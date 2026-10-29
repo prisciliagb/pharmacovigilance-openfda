@@ -1,0 +1,36 @@
+[project]
+name = "pharmacovigilance-openfda"
+version = "0.1.0"
+description = "Pipeline de pharmacovigilance openFDA (FAERS) : ingestion GCP, dbt sur BigQuery, ML et Power BI"
+readme = "README.md"
+authors = [
+    { name = "prisciliagb", email = "prisciliagb813@gmail.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "db-dtypes>=1.8.0",
+    "dbt-bigquery>=1.12.1",
+    "dbt-core>=1.12.6",
+    "google-cloud-bigquery>=3.46.2",
+    "google-cloud-storage>=3.1.1",
+    "pandas>=3.0.6",
+    "pyarrow>=26.0.0",
+    "requests>=2.34.2",
+]
+
+[project.scripts]
+pharmacovigilance-openfda = "pharmacovigilance_openfda:main"
+
+[build-system]
+requires = ["uv_build>=0.13.3,<0.14.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "ipykernel>=7.4.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.11.2",
+    "ruff>=0.17.1",
+    "scikit-learn>=1.9.1",
+    "xgboost>=3.4.1",
+]

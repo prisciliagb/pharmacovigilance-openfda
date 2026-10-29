@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.ipynb_checkpoints/
+
+# Secrets : clé API openFDA, clés de compte de service
+.env
+.env.*
+!.env.example
+*-sa-key*.json
+*credentials*.json
+service-account*.json
+
+# dbt
+target/
+dbt_packages/
+logs/
+
+# OS / éditeur
+.DS_Store
+.vscode/
