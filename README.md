@@ -38,10 +38,20 @@ gcloud auth application-default login
 cp .env.example .env   # puis renseigner OPENFDA_API_KEY
 ```
 
+## Découverte de l'API (Module 2)
+
+`uv run python explo/api_discovery.py` — résultats au 29/10/2026 :
+
+- Un signalement = un objet imbriqué : en-tête (dates, gravité, pays), `primarysource`, et `patient` avec deux listes `drug[]` et `reaction[]`.
+- **1 319 106** signalements reçus en 2024.
+- Top réactions : DRUG INEFFECTIVE, OFF LABEL USE, DEATH, NAUSEA, FATIGUE.
+- Top médicaments dans les signalements avec suspect : HUMIRA, ENBREL, DUPIXENT, ZANTAC, REVLIMID.
+- **178 877** signalements graves mentionnent l'ibuprofène.
+
 ## Avancement
 
 - [x] Module 1 — Installation et configuration
-- [ ] Module 2 — Découverte de l'API openFDA
+- [x] Module 2 — Découverte de l'API openFDA
 - [ ] Module 3 — Ingestion Python vers GCS et BigQuery
 - [ ] Module 4 — Exploration SQL dans BigQuery
 - [ ] Module 5 — Transformation avec dbt
