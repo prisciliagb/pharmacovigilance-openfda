@@ -16,7 +16,9 @@ service-account*.json
 target/
 dbt_packages/
 logs/
+.user.yml
 
 # OS / éditeur
 .DS_Store
 .vscode/
+.user.yml
