@@ -1,0 +1,14 @@
+# Aucun secret ici : en local, authentification oauth via
+# `gcloud auth application-default login`.
+pharmaco:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT', 'pharmaco-openfda-pg') }}"
+      dataset: dbt_dev
+      location: EU
+      threads: 4
+      job_execution_timeout_seconds: 300
+      priority: interactive
