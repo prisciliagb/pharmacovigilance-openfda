@@ -1,0 +1,10 @@
+# Fichiers non envoyés à Cloud Build lors de `gcloud run jobs deploy --source .`
+.gcloudignore
+.git/
+.gitignore
+.venv/
+.env
+**/__pycache__/
+pharmaco/
+explo/
+src/

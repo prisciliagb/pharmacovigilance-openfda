@@ -74,7 +74,9 @@ def main() -> None:
         search='serious:1+AND+patient.drug.openfda.generic_name:"IBUPROFEN"',
         limit=1,
     )
-    print(f"\n5. Signalements graves avec ibuprofène : {data['meta']['results']['total']:,}")
+    print(
+        f"\n5. Signalements graves avec ibuprofène : {data['meta']['results']['total']:,}"
+    )
 
 
 if __name__ == "__main__":
