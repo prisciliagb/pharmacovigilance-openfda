@@ -30,3 +30,5 @@ models:
 seeds:
   pharmaco:
     +schema: seeds
+    +column_types:
+      code: string

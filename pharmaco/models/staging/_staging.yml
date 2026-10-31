@@ -1,0 +1,48 @@
+models:
+  - name: stg_openfda__reports
+    description: Un signalement (dernière version chargée), JSON aplati, colonnes typées.
+    columns:
+      - name: safety_report_id
+        description: Identifiant du signalement.
+        data_tests: [unique, not_null]
+      - name: receive_date
+        description: Date de réception par la FDA.
+        data_tests: [not_null]
+      - name: is_serious
+        description: Signalement grave (serious = 1).
+      - name: occur_country
+        description: Code pays de survenue.
+      - name: reporter_qualification
+        description: Code du type de déclarant (1 médecin … 5 consommateur).
+      - name: patient_age
+        description: Âge déclaré, dans l'unité de patient_age_unit.
+      - name: patient_age_unit
+        description: Unité de l'âge (801 années, 802 mois, 804 jours…).
+
+  - name: stg_openfda__report_drugs
+    description: Un médicament d'un signalement.
+    columns:
+      - name: report_drug_id
+        description: Clé technique (signalement + position du médicament).
+        data_tests: [unique, not_null]
+      - name: safety_report_id
+        data_tests: [not_null]
+      - name: medicinal_product
+        description: Nom déclaré, texte libre non nettoyé.
+      - name: generic_name
+        description: Nom générique harmonisé par openFDA (souvent absent).
+      - name: drug_role
+        description: 1 suspect, 2 concomitant, 3 interaction.
+
+  - name: stg_openfda__report_reactions
+    description: Une réaction (terme MedDRA) d'un signalement.
+    columns:
+      - name: report_reaction_id
+        description: Clé technique (signalement + position de la réaction).
+        data_tests: [unique, not_null]
+      - name: safety_report_id
+        data_tests: [not_null]
+      - name: reaction
+        description: Terme MedDRA de la réaction, en majuscules.
+      - name: reaction_outcome
+        description: Issue de la réaction (1 rétabli … 5 fatal, 6 inconnu).

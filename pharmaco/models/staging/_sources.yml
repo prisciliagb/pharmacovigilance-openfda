@@ -1,0 +1,22 @@
+sources:
+  - name: openfda
+    description: Données brutes chargées par ingestion/ingest_openfda.py (Cloud Run, chaque jour à 6 h).
+    database: pharmaco-openfda-pg
+    schema: raw
+    tables:
+      - name: openfda_drug_event
+        description: Un signalement openFDA drug/event (FAERS) par ligne, JSON complet dans `report`.
+        config:
+          loaded_at_field: ingested_at
+          freshness:
+            warn_after: {count: 2, period: day}
+            error_after: {count: 4, period: day}
+        columns:
+          - name: safety_report_id
+            description: Identifiant du signalement.
+          - name: receive_date
+            description: Date de réception par la FDA (partition).
+          - name: ingested_at
+            description: Horodatage de l'ingestion.
+          - name: report
+            description: Signalement complet (JSON).

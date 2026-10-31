@@ -1,0 +1,88 @@
+models:
+  - name: fct_reports
+    description: >
+      Table de faits des signalements (1 ligne par signalement). Incrémentale, partitionnée
+      par mois de réception, 30 derniers jours recalculés à chaque exécution.
+    columns:
+      - name: safety_report_id
+        description: Identifiant du signalement.
+        data_tests: [unique, not_null]
+      - name: receive_date
+        description: Date de réception par la FDA.
+        data_tests: [not_null]
+      - name: is_serious
+        description: Signalement grave.
+      - name: age_group
+        description: Tranche d'âge.
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['0-17', '18-44', '45-64', '65-79', '80+', 'Inconnu']
+      - name: reporter_label
+        description: Type de déclarant (libellé du seed ref_reporter_qualification).
+      - name: primary_suspect_drug
+        description: Premier médicament suspect du signalement.
+
+  - name: fct_drug_reactions
+    description: Un couple médicament suspect × réaction × signalement. Base du top couples et du PRR.
+    columns:
+      - name: drug_reaction_key
+        description: Clé (signalement | médicament | réaction).
+        data_tests: [unique, not_null]
+      - name: safety_report_id
+        data_tests:
+          - not_null
+          - relationships:
+              arguments:
+                to: ref('fct_reports')
+                field: safety_report_id
+      - name: drug_name
+        description: Médicament suspect harmonisé.
+      - name: reaction
+        description: Terme MedDRA.
+      - name: is_fatal_outcome
+        description: La réaction a une issue fatale (reactionoutcome = 5).
+
+  - name: mart_monthly_kpis
+    description: KPI mensuels (volume, gravité, croissance) pour les courbes du dashboard.
+    columns:
+      - name: receive_month
+        description: Mois de réception.
+        data_tests: [unique, not_null]
+      - name: mom_growth
+        description: Croissance du nombre de signalements par rapport au mois précédent.
+
+  - name: mart_drug_safety
+    description: >
+      Un médicament suspect : volume de signalements, taux de graves et de décès, écart au
+      taux global. Des signalements, pas un risque (pas de dénominateur de patients exposés).
+    columns:
+      - name: drug_name
+        data_tests: [unique, not_null]
+      - name: serious_rate_gap
+        description: Taux de graves du médicament moins taux global (en proportion).
+
+  - name: mart_signal_prr
+    description: >
+      Détection de signaux par PRR (Proportional Reporting Ratio) pour chaque couple
+      médicament suspect × réaction avec au moins 3 signalements.
+    columns:
+      - name: drug_reaction_pair
+        data_tests: [unique, not_null]
+      - name: prr
+        description: PRR = [a/(a+b)] / [c/(c+d)].
+      - name: chi_square
+        description: Khi-deux avec correction de Yates.
+      - name: is_signal
+        description: PRR >= 2 et khi-deux >= 4 (critères d'Evans). Hypothèse à investiguer.
+
+  - name: ml_features_serious
+    description: >
+      Features pour prédire la gravité d'un signalement, sans fuite de données
+      (aucune colonne de gravité, d'issue ni de terme de réaction). Cible : is_serious.
+    columns:
+      - name: safety_report_id
+        data_tests: [unique, not_null]
+      - name: is_serious
+        description: Cible du modèle.
+        data_tests: [not_null]

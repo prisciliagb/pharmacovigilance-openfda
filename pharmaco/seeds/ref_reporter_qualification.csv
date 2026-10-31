@@ -1,0 +1,6 @@
+code,reporter_label,is_health_professional
+1,Médecin,true
+2,Pharmacien,true
+3,Autre professionnel de santé,true
+4,Avocat,false
+5,Consommateur,false

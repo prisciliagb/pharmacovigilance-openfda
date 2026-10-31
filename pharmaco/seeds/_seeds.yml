@@ -1,0 +1,16 @@
+seeds:
+  - name: ref_reporter_qualification
+    description: Code primarysource.qualification → type de déclarant.
+    columns:
+      - name: code
+        data_tests: [unique, not_null]
+  - name: ref_patient_sex
+    description: Code patient.patientsex → libellé.
+    columns:
+      - name: code
+        data_tests: [unique, not_null]
+  - name: ref_reaction_outcome
+    description: Code reaction.reactionoutcome → issue de la réaction.
+    columns:
+      - name: code
+        data_tests: [unique, not_null]

@@ -1,0 +1,7 @@
+code,outcome_label
+1,Rétabli
+2,En cours de rétablissement
+3,Non rétabli
+4,Rétabli avec séquelles
+5,Fatal
+6,Inconnu

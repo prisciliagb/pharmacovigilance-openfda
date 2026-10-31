@@ -1,0 +1,39 @@
+models:
+  - name: int_drugs_normalized
+    description: >
+      Un médicament harmonisé par signalement. Nom = générique openFDA, sinon nom déclaré
+      nettoyé (dosages, unités, parenthèses, ponctuation). Doublons dans un même signalement
+      fusionnés en gardant le rôle le plus fort.
+    columns:
+      - name: report_drug_key
+        description: Clé (signalement | médicament harmonisé).
+        data_tests: [unique, not_null]
+      - name: drug_name
+        description: Nom de médicament harmonisé.
+        data_tests: [not_null]
+      - name: drug_role
+        description: 1 suspect, 2 concomitant, 3 interaction, 4 non administré (format E2B R3).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['1', '2', '3', '4']
+              config:
+                where: drug_role is not null
+
+  - name: int_reports_enriched
+    description: >
+      Un signalement enrichi : âge en années et tranche d'âge, libellés issus des seeds,
+      nombre de médicaments et de réactions, médicament suspect principal.
+    columns:
+      - name: safety_report_id
+        data_tests: [unique, not_null]
+      - name: age_years
+        description: Âge converti en années (801 années, 802 mois, 804 jours…), null si aberrant.
+      - name: age_group
+        description: Tranche d'âge (0-17, 18-44, 45-64, 65-79, 80+, Inconnu).
+        data_tests:
+          - accepted_values:
+              arguments:
+                values: ['0-17', '18-44', '45-64', '65-79', '80+', 'Inconnu']
+      - name: primary_suspect_drug
+        description: Premier médicament suspect du signalement.
