@@ -30,12 +30,32 @@ explo/       découverte de l'API et exploration SQL
 pharmaco/    projet dbt
 ```
 
+## Configuration GCP (Module 1)
+
+| Ressource | Valeur |
+|---|---|
+| Projet | `pharmaco-openfda-pg` |
+| Budget | 10 €, alertes à 50 %, 90 % et 100 % |
+| Bucket (EU) | `gs://pharmaco-openfda-pg-raw` |
+| Datasets BigQuery (EU) | `raw`, `explo`, `ml` ; dbt écrit dans `dbt_dev_*` |
+| Compte de service | `pipeline-sa` : BigQuery Data Editor, BigQuery Job User, Storage Object Admin, Cloud Run Invoker, Secret Manager Secret Accessor |
+| API activées | BigQuery, Cloud Storage, Cloud Run, Cloud Scheduler, Artifact Registry, Cloud Build, Secret Manager |
+
+```bash
+gcloud storage buckets create gs://pharmaco-openfda-pg-raw --location=EU
+bq --location=EU mk -d pharmaco-openfda-pg:raw
+bq --location=EU mk -d pharmaco-openfda-pg:explo
+bq --location=EU mk -d pharmaco-openfda-pg:ml
+gcloud iam service-accounts create pipeline-sa --display-name="Pipeline openFDA"
+```
+
 ## Démarrage
 
 ```bash
 uv sync
 gcloud auth application-default login
 cp .env.example .env   # puis renseigner OPENFDA_API_KEY
+cd pharmaco && uv run dbt debug
 ```
 
 ## Découverte de l'API (Module 2)
