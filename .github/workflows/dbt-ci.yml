@@ -1,0 +1,56 @@
+name: dbt CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: dbt-ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dbt-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      GCP_PROJECT: ${{ secrets.GCP_PROJECT }}
+      GITHUB_RUN_ID: ${{ github.run_id }}
+    defaults:
+      run:
+        working-directory: pharmaco
+
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: S'authentifier à Google Cloud (compte pipeline-sa)
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+
+      - name: Installer uv et Python
+        uses: astral-sh/setup-uv@v5
+        with:
+          python-version: "3.12"
+
+      - name: Installer les dépendances
+        run: uv sync --frozen --no-dev --no-install-project
+
+      - name: dbt build (dataset temporaire dbt_ci_<run_id>, 30 derniers jours)
+        run: uv run --no-sync dbt build --target ci
+
+      - name: Supprimer les datasets temporaires, même en cas d'échec
+        if: always()
+        run: |
+          uv run --no-sync python - <<'EOF'
+          import os
+          from google.cloud import bigquery
+
+          client = bigquery.Client(project=os.environ["GCP_PROJECT"])
+          prefix = f"dbt_ci_{os.environ['GITHUB_RUN_ID']}"
+          for dataset in client.list_datasets():
+              if dataset.dataset_id.startswith(prefix):
+                  client.delete_dataset(dataset.reference, delete_contents=True, not_found_ok=True)
+                  print("supprimé :", dataset.dataset_id)
+          EOF
