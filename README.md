@@ -28,6 +28,7 @@ Python 3.12 · uv · Google Cloud Storage · BigQuery · Cloud Run Jobs · Cloud
 ingestion/   script d'ingestion openFDA → GCS → BigQuery, SQL de la table brute
 explo/       découverte de l'API, aplatissement et 30 questions SQL
 pharmaco/    projet dbt (seeds, staging, intermediate, marts, tests)
+ml/          modèles BigQuery ML et notebook XGBoost
 Dockerfile   image du job Cloud Run
 ```
 
@@ -141,6 +142,32 @@ Requêtes : [explo/kpis.sql](explo/kpis.sql), calculées sur les marts dbt. Pér
 
 **Lecture** : ces chiffres décrivent des **signalements**. Un médicament très prescrit ou suivi par un programme patient génère mécaniquement plus de déclarations, et les cas graves sont surreprésentés hors États-Unis et chez les avocats pour des raisons réglementaires et juridiques.
 
+## Machine Learning : prédire la gravité (Module 7)
+
+**Cas d'usage** : estimer la probabilité qu'un signalement soit grave, pour aider une équipe de pharmacovigilance à prioriser sa revue.
+
+- **Features** : `ml_features_serious` (dbt). Âge, sexe, type de déclarant, groupe de pays (20 premiers + OTHER), nombre de médicaments et de suspects, interaction, voie et classe du suspect principal. **Pas de fuite de données** : aucune colonne de gravité, d'issue ni de terme de réaction.
+- **Découpage temporel** : entraînement sur avril-mai 2026, test sur juin 2026. Seuls 3 mois sont chargés, donc le test porte sur le dernier mois et non sur les 3 derniers comme dans le brief. Le mois de réception est exclu des features, puisque juin n'existe pas à l'entraînement.
+- **Code** : [ml/bqml_serious.sql](ml/bqml_serious.sql) (BigQuery ML) et [ml/train_serious.ipynb](ml/train_serious.ipynb) (XGBoost et comparaison).
+
+| Modèle (test : juin 2026, seuil 0,5) | AUC | Exactitude | Précision | Rappel | F1 |
+|---|---|---|---|---|---|
+| Baseline (toujours « grave ») | 0,500 | 0,506 | 0,506 | 1,000 | 0,672 |
+| BigQuery ML, régression logistique | 0,862 | 0,782 | 0,775 | 0,801 | 0,788 |
+| **BigQuery ML, boosted tree** | **0,898** | **0,817** | **0,834** | 0,796 | **0,815** |
+| XGBoost (Python) | 0,859 | 0,802 | 0,805 | 0,805 | 0,805 |
+
+Le boosted tree de BigQuery ML est retenu. Ses prédictions sont écrites dans `ml.predictions_serious` pour Power BI.
+
+**Variables les plus importantes** (`ML.GLOBAL_EXPLAIN`) :
+1. **Groupe de pays** : de loin la plus forte. Hors États-Unis, seuls les cas graves sont transmis à la FDA, donc le pays prédit la gravité pour une raison réglementaire, pas médicale.
+2. **Voie d'administration du suspect principal** : 87 % de signalements graves en intramusculaire et 79 % en intraveineux (traitements hospitaliers, oncologie), contre 63 % par voie orale et seulement 29 % en sous-cutané, où dominent les biothérapies et GLP-1 auto-injectés déclarés par les patients. Certaines voies restent des codes numériques E2B non traduits (`065`, `061`…), une piste d'amélioration.
+3. **Classe pharmacologique du suspect principal** : les anticancéreux et immunosuppresseurs se distinguent des traitements chroniques courants.
+4. **Type de déclarant** : médecins et avocats déclarent surtout des cas graves, les consommateurs surtout des cas non graves.
+5. **Nombre de médicaments** : la polymédication accompagne des patients plus fragiles.
+
+**Limites** : la gravité est déclarée et non mesurée ; les biais de déclaration (pays, avocats, programmes patients) portent une grande partie de la performance ; la période est courte (2 mois d'entraînement), sans saisonnalité exploitable ; le modèle priorise une revue, il n'établit aucune causalité.
+
 ## Limites
 
 - Données déclaratives : un signalement ne prouve pas la causalité, et il n'y a pas de dénominateur (nombre de patients exposés).
@@ -155,3 +182,4 @@ Requêtes : [explo/kpis.sql](explo/kpis.sql), calculées sur les marts dbt. Pér
 - [x] Module 4 — Exploration SQL dans BigQuery
 - [x] Module 5 — Transformation avec dbt
 - [x] Module 6 — Axes d'analyse et KPI
+- [x] Module 7 — Machine Learning
