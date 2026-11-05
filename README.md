@@ -126,6 +126,21 @@ uv run dbt source freshness
 uv run dbt docs generate && uv run dbt docs serve
 ```
 
+## Axes d'analyse et KPI (Module 6)
+
+Requêtes : [explo/kpis.sql](explo/kpis.sql), calculées sur les marts dbt. Période : avril → juin 2026, **352 949 signalements**.
+
+| Axe | Question | Constats |
+|---|---|---|
+| 1. Volume et tendance | Les signalements augmentent-ils ? | 127 219 en avril, 108 914 en mai (−14 %), 116 816 en juin (+7 %). ~5 000 signalements par jour ouvré contre ~900 le samedi : le volume suit le calendrier de traitement, pas l'épidémiologie. Pic le 23/04 (8 702, soit 2× la moyenne mobile 7 jours) |
+| 2. Gravité | Quelle part est grave, et comment ? | **52,4 %** de signalements graves ; 18,1 % avec hospitalisation, 6,4 % avec décès, 2,9 % avec pronostic vital engagé, 1,4 % avec invalidité. Part de graves en légère baisse (54,7 % → 50,6 %) |
+| 3. Médicaments et réactions | Lesquels dominent ? | Dupilumab en tête (39 332 signalements, 9 % graves), puis tirzépatide et sémaglutide oral : les biothérapies et GLP-1 récents, très suivis par les programmes patients des laboratoires, dominent le volume. Réactions les plus fréquentes : usage hors AMM, inefficacité, nausées |
+| 4. Profil patient | Qui est concerné ? | 45-64 ans et 65-79 ans majoritaires. La part de graves croît avec l'âge (47,5 % chez les 0-17 ans → 66,4 % chez les 80 ans et plus), comme la polymédication (2,3 → 3,3 médicaments). À âge égal, les signalements chez les hommes sont plus souvent graves. 39 % des signalements n'ont pas d'âge exploitable |
+| 5. Géographie et déclarants | D'où viennent les cas, qui déclare ? | 60 % des États-Unis (31 % graves) ; hors États-Unis, ~98 % graves, car seuls les cas étrangers graves doivent être transmis à la FDA. 56 % déclarés par des consommateurs (35 % graves) contre 83 % graves pour les médecins. Les avocats (2,7 %) déclarent 99 % de cas graves, liés à des contentieux |
+| 6. Détection de signaux | Quelles associations sont anormalement fréquentes ? | Avec au moins 3 cas, 125 735 couples sur 158 915 passent les critères d'Evans : les couples rares franchissent facilement le khi-deux. Avec au moins 50 cas, 6 674 signaux. Le plus fort : médroxyprogestérone × méningiome (8 360 cas, PRR ≈ 10 000), un signal documenté et objet de contentieux |
+
+**Lecture** : ces chiffres décrivent des **signalements**. Un médicament très prescrit ou suivi par un programme patient génère mécaniquement plus de déclarations, et les cas graves sont surreprésentés hors États-Unis et chez les avocats pour des raisons réglementaires et juridiques.
+
 ## Limites
 
 - Données déclaratives : un signalement ne prouve pas la causalité, et il n'y a pas de dénominateur (nombre de patients exposés).
@@ -139,3 +154,4 @@ uv run dbt docs generate && uv run dbt docs serve
 - [x] Module 3 — Ingestion Python vers GCS et BigQuery
 - [x] Module 4 — Exploration SQL dans BigQuery
 - [x] Module 5 — Transformation avec dbt
+- [x] Module 6 — Axes d'analyse et KPI
