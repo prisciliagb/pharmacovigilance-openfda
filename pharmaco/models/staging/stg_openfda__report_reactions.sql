@@ -2,6 +2,7 @@
 with latest as (
     select safety_report_id, report
     from {{ source('openfda', 'openfda_drug_event') }}
+    {{ ci_sample_filter() }}
     qualify row_number() over (partition by safety_report_id order by ingested_at desc) = 1
 )
 

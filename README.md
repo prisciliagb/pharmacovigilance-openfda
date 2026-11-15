@@ -168,6 +168,21 @@ Le boosted tree de BigQuery ML est retenu. Ses prédictions sont écrites dans `
 
 **Limites** : la gravité est déclarée et non mesurée ; les biais de déclaration (pays, avocats, programmes patients) portent une grande partie de la performance ; la période est courte (2 mois d'entraînement), sans saisonnalité exploitable ; le modèle priorise une revue, il n'établit aucune causalité.
 
+## Intégration continue (Module 9)
+
+[.github/workflows/dbt-ci.yml](.github/workflows/dbt-ci.yml) lance `dbt build --target ci` à chaque pull request et à chaque push sur `main` :
+
+1. authentification à GCP avec le compte `pipeline-sa` (secret GitHub `GCP_SA_KEY`) ;
+2. installation de Python et des dépendances avec uv ;
+3. `dbt build` dans un dataset temporaire `dbt_ci_<run_id>`, limité aux 30 derniers jours chargés (macro `ci_sample_filter`) pour réduire le coût ;
+4. suppression des datasets temporaires, même en cas d'échec.
+
+Secrets GitHub nécessaires : `GCP_PROJECT` et `GCP_SA_KEY`.
+
+**Façon de travailler** : une branche par fonctionnalité (`feat/...`), une pull request par branche, fusion seulement si la CI est verte.
+
+**Amélioration possible** : remplacer la clé JSON du compte de service par **Workload Identity Federation**, qui permet à GitHub de s'authentifier à GCP sans aucune clé stockée.
+
 ## Limites
 
 - Données déclaratives : un signalement ne prouve pas la causalité, et il n'y a pas de dénominateur (nombre de patients exposés).
@@ -183,3 +198,4 @@ Le boosted tree de BigQuery ML est retenu. Ses prédictions sont écrites dans `
 - [x] Module 5 — Transformation avec dbt
 - [x] Module 6 — Axes d'analyse et KPI
 - [x] Module 7 — Machine Learning
+- [x] Module 9 — Intégration continue

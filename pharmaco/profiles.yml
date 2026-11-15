@@ -1,5 +1,7 @@
-# Aucun secret ici : en local, authentification oauth via
-# `gcloud auth application-default login`.
+# Aucun secret ici.
+# - dev : en local, authentification oauth via `gcloud auth application-default login`.
+# - ci  : dans GitHub Actions, l'action google-github-actions/auth fournit les identifiants
+#         du compte pipeline-sa ; chaque exécution écrit dans son propre dataset temporaire.
 pharmaco:
   target: dev
   outputs:
@@ -8,6 +10,16 @@ pharmaco:
       method: oauth
       project: "{{ env_var('GCP_PROJECT', 'pharmaco-openfda-pg') }}"
       dataset: dbt_dev
+      location: EU
+      threads: 4
+      job_execution_timeout_seconds: 300
+      priority: interactive
+
+    ci:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT') }}"
+      dataset: "dbt_ci_{{ env_var('GITHUB_RUN_ID') }}"
       location: EU
       threads: 4
       job_execution_timeout_seconds: 300
