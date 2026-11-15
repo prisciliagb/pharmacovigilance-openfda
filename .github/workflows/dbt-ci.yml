@@ -30,6 +30,7 @@ jobs:
           credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       - name: Installer uv et Python
+        id: setup-uv
         uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
@@ -41,7 +42,7 @@ jobs:
         run: uv run --no-sync dbt build --target ci
 
       - name: Supprimer les datasets temporaires, même en cas d'échec
-        if: always()
+        if: always() && steps.setup-uv.outcome == 'success'
         run: |
           uv run --no-sync python - <<'EOF'
           import os
